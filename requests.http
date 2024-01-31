@@ -1,0 +1,8 @@
+###
+POST http://localhost:8000/partner/update
+Content-Type: application/json
+
+{
+    "url": "https://raw.githubusercontent.com/netology-code/pd-diplom/master/data/shop1.yaml"
+}
+
