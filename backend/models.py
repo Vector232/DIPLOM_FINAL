@@ -1,5 +1,9 @@
 from django.db import models
 
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractUser
+
+from django_rest_passwordreset.tokens import get_token_generator
 
 STATUS_CHOICES = (
     ('cart', 'Корзина'),
@@ -11,10 +15,53 @@ STATUS_CHOICES = (
     ('canceled', 'Отменен'),
 )
 
+USER_TYPE = (
+    ('shop', 'Магазин'),
+    ('buyer', 'Покупатель'),
+)
 
-# Нужно плотно разобраться с Джанговскими способами реализации авторизации и т.д.  !!!!!!!!!!!!
-class User(models.Model): # временное решение
-	name = models.CharField(max_length=50, verbose_name='Имя')
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def _create_user(self, email, password, **extra_fields):
+        if not password:
+            raise ValueError('Необходимо задать пароль!')
+        if not email:
+            raise ValueError('Необходимо указать Email!')
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+
+        return self._create_user(email, password, **extra_fields)
+
+
+class User(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    objects = UserManager()
+
+    username = None
+    email = models.EmailField(verbose_name='Email', unique=True)
+    company = models.CharField(verbose_name='Компания', max_length=50, blank=True)
+    position = models.CharField(verbose_name='Должность', max_length=50, blank=True)
+    is_active = models.BooleanField(('active'), default=False)
+    type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE, max_length=5, default='buyer')
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
 
 class Contact(models.Model):
     user = models.ForeignKey(User, verbose_name='Пользователь', related_name='contacts', blank=True, on_delete=models.CASCADE)
@@ -27,7 +74,25 @@ class Contact(models.Model):
     phone = models.CharField(max_length=50, verbose_name='Телефон')
 
     def __str__(self):
-        return f'{self.city}, ул.{self.street}, дом {self.house} ({self.phone})'
+        return f'{self.city}, ул.{self.street}, дом {self.house} ({self.phone})'	
+
+class ConfirmEmailToken(models.Model):
+    user = models.ForeignKey(User, related_name='confirm_email_tokens', on_delete=models.CASCADE,
+		verbose_name="Связанный пользователь")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата выдачи токена.")
+    key = models.CharField(verbose_name="Ключ", max_length=100, db_index=True, unique=True)
+
+    @staticmethod
+    def generate_key():
+        return get_token_generator().generate_token()
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = self.generate_key()
+        return super(ConfirmEmailToken, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Токен подтверждения Email для пользователя {self.user}"
 
 class Shop(models.Model):
 	name = models.CharField(max_length=50, verbose_name='Название')
