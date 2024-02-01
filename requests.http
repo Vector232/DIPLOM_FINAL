@@ -1,3 +1,19 @@
+POST http://localhost:8000/user/register
+Content-Type: application/json
+
+{
+    "first_name": "Ivan",
+    "last_name": "Ivanov",
+    "email": "ivanovivan@mail.ru",
+    "password": "1234fwef123r1f1234",
+    "company": "Company I",
+    "position": "Good Boy"
+}
+
+###
+
+
+
 ###
 POST http://localhost:8000/partner/update
 Content-Type: application/json
