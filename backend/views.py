@@ -17,10 +17,6 @@ from yaml import load as load_yaml, Loader
 from backend.models import User, Contact, Shop, Category, Product, ProductParameter, OrderItem, Order, ConfirmEmailToken
 from backend.serializers import UserSerializer
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
 class PartnerUpdate(APIView):
     permission_classes = [IsAuthenticated]
     throttle_scope = 'change_price'
@@ -132,3 +128,7 @@ class UserInfo(APIView):
             else:
                 return Response(
                     {'status': False, 'ERRORS': 'Не все арументы указаны!'})
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
