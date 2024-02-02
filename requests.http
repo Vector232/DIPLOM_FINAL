@@ -4,7 +4,7 @@ Content-Type: application/json
 {
     "first_name": "Ivan",
     "last_name": "Ivanov",
-    "email": "ivanovivanshop2@mail.ru",
+    "email": "ivanovivanshop3@mail.ru",
     "password": "1234fwef123r1f1234",
     "company": "Company I",
     "position": "Good Boy",
@@ -17,8 +17,8 @@ POST http://localhost:8000/user/register/confirm
 Content-Type: application/json
 
 {
-    "email": "ivanovivanshop2@mail.ru",
-    "token": "94316c4aa0f158fac2adf9d19261de5183563d15418c"
+    "email": "ivanovivanshop3@mail.ru",
+    "token": "109a3ea3c99c190134e532bcb5d7df4f789b5618"
 }
 
 ###
@@ -27,7 +27,7 @@ POST http://localhost:8000/user/login
 Content-Type: application/json
 
 {
-    "email": "ivanovivanshop2@mail.ru",
+    "email": "ivanovivanshop3@mail.ru",
     "password": "1234fwef123r1f1234"
 }
 
@@ -35,7 +35,7 @@ Content-Type: application/json
 
 POST http://localhost:8000/partner/update
 Content-Type: application/json
-Authorization: Token 9b27bdff96517b5d3795ac3a4040dcb3b2708ad4
+Authorization: Token 5a2e7c8bdf605cb3da58b8a60ec1eb48ac7a57b0
 
 {
     "url": "https://raw.githubusercontent.com/netology-code/pd-diplom/master/data/shop1.yaml"
