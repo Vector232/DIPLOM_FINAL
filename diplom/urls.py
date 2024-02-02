@@ -29,4 +29,6 @@ urlpatterns = [
     path('partner/update', PartnerUpdate.as_view()),
     path('user/register', RegisterUser.as_view()),
     path('api/v1/', include(router.urls)),
+    path('user/register/confirm', Сonfirmation.as_view()),
+    path('user/login', LoginUser.as_view()),
 ]

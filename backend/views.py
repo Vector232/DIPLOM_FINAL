@@ -20,8 +20,9 @@ from backend.serializers import UserSerializer
 class PartnerUpdate(APIView):
     permission_classes = [IsAuthenticated]
     throttle_scope = 'change_price'
-
+    
     def post(self, request, *args, **kwargs):
+        
         if request.user.type != 'shop':
             return Response({'status': False, 'ERROR': 'Только для магазинов!'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -68,7 +69,7 @@ class RegisterUser(APIView):
                     user.set_password(request.data['password'])
                     user.save()
                     token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user.id)
-                    return Response({'status': True, 'token': token.key})
+                    return Response({'status': True, 'token': token.key, 'data': request.data})
                 else:
                     return Response({'status': False, 'ERROR': user_serializer.errors}, status=status.HTTP_403_FORBIDDEN
                                     )
@@ -132,3 +133,15 @@ class UserInfo(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+class LoginUser(APIView):
+    """Авторизация"""
+    def post(self, request, *args, **kwargs):
+        if {'email', 'password'}.issubset(request.data):
+            user = authenticate(request, username=request.data['email'], password=request.data['password'])
+            if user is not None:
+                if user.is_active:
+                    token, _ = Token.objects.get_or_create(user=user)
+                    return Response({'status': True, 'token': token.key})
+            return Response({'status': False, 'ERROR': 'Ошибка входа!'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'status': False, 'ERROR': 'Не все поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
