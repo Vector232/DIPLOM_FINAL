@@ -1,44 +1,137 @@
+# Регистрируем поставщика.
 POST http://localhost:8000/user/register
 Content-Type: application/json
 
 {
     "first_name": "Ivan",
     "last_name": "Ivanov",
-    "email": "ivanovivanshop3@mail.ru",
+    "email": "ivanovivanshopmanager@mail.ru",
     "password": "1234fwef123r1f1234",
     "company": "Company I",
-    "position": "Good Boy",
+    "position": "manager",
     "type": "shop"
 }
 
 ###
 
+# Подтверждаем аккаунт.
 POST http://localhost:8000/user/register/confirm
 Content-Type: application/json
 
 {
-    "email": "ivanovivanshop3@mail.ru",
-    "token": "109a3ea3c99c190134e532bcb5d7df4f789b5618"
+    "email": "ivanovivanshopmanager@mail.ru",
+    "token": "b3286d019751f868ae9e1fd"
 }
 
 ###
 
+# Регистрируем покупателя.
+POST http://localhost:8000/user/register
+Content-Type: application/json
+
+{
+    "first_name": "Nikolai",
+    "last_name": "Nikolaev",
+    "email": "nikolaiNikolaev@mail.ru",
+    "password": "qweriupo231e",
+}
+
+###
+
+# Не забываем подтвердить аккаунт.
+POST http://localhost:8000/user/register/confirm
+Content-Type: application/json
+
+{
+    "email": "nikolaiNikolaev@mail.ru",
+    "token": ""
+}
+
+###
+
+# Входим в аккаунт.
 POST http://localhost:8000/user/login
 Content-Type: application/json
 
 {
-    "email": "ivanovivanshop3@mail.ru",
-    "password": "1234fwef123r1f1234"
+    "email": "ivanovivanshopmanager@mail.ru",
+    "password": "1234fwef123r1f1234_2"
 }
 
 ###
 
+# Обновляем данные по продуктам.
 POST http://localhost:8000/partner/update
 Content-Type: application/json
-Authorization: Token 5a2e7c8bdf605cb3da58b8a60ec1eb48ac7a57b0
+Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
 
 {
     "url": "https://raw.githubusercontent.com/netology-code/pd-diplom/master/data/shop1.yaml"
+}
+
+###
+
+# Если хотим сменить пароль.
+POST http://localhost:8000/user/passwordreset
+Content-Type: application/json
+
+{
+    "email": "ivanovivanshopmanager@mail.ru"
+}
+
+###
+
+# Подтверждаем смену пароля. Для удобства проверки ключь вернулся в пердыдущем запросе.
+POST http://localhost:8000/user/passwordreset/confirm
+Content-Type: application/json
+
+{
+    "password": "1234fwef123r1f1234_2",
+    "token": "34ce0134650d452809f163b7d0e74b"
+}
+###
+
+# Проверяем свои данные.
+GET http://localhost:8000/user/details
+Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+###
+
+# Вносим контактные данные.
+POST http://localhost:8000/user/contacts
+Content-Type: application/json
+
+{
+    "city": "Lenino",
+    "street": "Lenina",
+    "house": "5",
+    "structure": "1",
+    "building": "B",
+    "apartment": "5",
+    "phone": "12345",
+    "user": 9
+}
+
+###
+
+# Проверяем внесены ли данные.
+GET http://localhost:8000/user/contact
+Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+
+###
+
+POST http://localhost:8000/user/contact
+Content-Type: application/json
+Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+
+{
+    "city": "SPB",
+    "street": "Nevskiy",
+    "house": "4",
+    "structure": "1",
+    "building": "B",
+    "apartment": "5",
+    "phone": "12345",
+    "id": 1
 }
 
 ###

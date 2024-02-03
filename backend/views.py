@@ -94,7 +94,7 @@ class RegisterUser(APIView):
                     user.set_password(request.data['password'])
                     user.save()
                     token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user.id)
-                    return Response({'status': True, 'token': token.key, 'data': request.data})
+                    return Response({'status': True, 'token': token.key})
                 else:
                     return Response({'status': False, 'ERROR': user_serializer.errors}, status=status.HTTP_403_FORBIDDEN
                                     )
@@ -204,10 +204,20 @@ class ContactView(APIView):
         serializer = ContactSerializer(contact, many=True)
         return Response(serializer.data)
 
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         if {'id'}.issubset(request.data):
+            if request.user.id != request.data['id']:
+                return Response({'status': False, 'ERROR': 'Отказанно в доступе!'}, status=status.HTTP_403_FORBIDDEN)
             try:
-                contact = Contact.objects.get(pk=int(request.data['id']))
+                contact = Contact(user=User.objects.get(id=request.user.id),
+                                  city=request.data['city'],
+                                  street=request.data['street'],
+                                  house=request.data['house'],
+                                  structure=request.data['structure'],
+                                  building=request.data['building'],
+                                  apartment=request.data['apartment'],
+                                  phone=request.data['phone'],
+                                  )
             except ValueError:
                 return Response({'status': False, 'ERROR': 'Не верный тип поля <ID>!'}, status=status.HTTP_400_BAD_REQUEST)
             serializer = ContactSerializer(contact, data=request.data, partial=True)
@@ -399,6 +409,7 @@ class OrderView(APIView):
                     return Response({'Status': False, 'ERROR': 'Аргументы указаны неправильно!'})
                 else:
                     if is_updated:
+                        on_change_order_status(request.user.id, request.data['id'])
                         return Response({'Status': True})
                     else:
                         error_message = 'ERROR'         
