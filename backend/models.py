@@ -94,7 +94,7 @@ class ConfirmEmailToken(models.Model):
     def __str__(self):
         return f"Токен подтверждения Email для пользователя {self.user}"
 
-class Shop(models.Model):
+class Shop(models.Model): # Мб ForeignKey в место OneToOneField?
 	name = models.CharField(max_length=50, verbose_name='Название')
 	url = models.URLField(verbose_name='Ссылка на файл прайса', null=True, blank=True)
 	user = models.OneToOneField(User, verbose_name='Пользователь', blank=True, null=True, on_delete=models.CASCADE)
@@ -109,7 +109,6 @@ class Category(models.Model):
 
 	def __str__(self):
 		return self.name
-
 
 class Product(models.Model):
 	name = models.CharField(max_length=50, verbose_name='Название')
@@ -150,17 +149,12 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
 	order = models.ForeignKey(Order, verbose_name='Заказ', related_name='ordered_items', blank=True, on_delete=models.CASCADE)
-	category = models.ForeignKey(Category, verbose_name='Категория товара', blank=True, null=True, on_delete=models.SET_NULL)
-	shop = models.ForeignKey(Shop, verbose_name='магазин', blank=True, null=True, on_delete=models.SET_NULL)
-	product_name = models.CharField(max_length=50, verbose_name='Название товара')
-	external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
-	quantity = models.PositiveIntegerField(default=1, verbose_name='Количество')
-	price = models.PositiveIntegerField(default=0, verbose_name='Цена')
+	product = models.ForeignKey(Product, verbose_name='Информация о продукте', related_name='ordered_items',
+                                     blank=True,
+                                     on_delete=models.CASCADE)
+	quantity = models.PositiveIntegerField(verbose_name='Количество')
+	price = models.PositiveIntegerField(verbose_name='Цена')
 	total_amount = models.PositiveIntegerField(default=0, verbose_name='Общая стоимость')
-
+      
 	def __str__(self):
-		return self.product_name
-
-	def save(self, *args, **kwargs):
-		self.total_amount = self.price * self.quantity
-		super(OrderItem, self).save(*args, **kwargs)
+	    return f"{self.product}"

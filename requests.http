@@ -20,7 +20,7 @@ Content-Type: application/json
 
 {
     "email": "ivanovivanshopmanager@mail.ru",
-    "token": "b3286d019751f868ae9e1fd"
+    "token": "a2a37c82b5bd29c97e9dedc4df455db"
 }
 
 ###
@@ -55,7 +55,7 @@ Content-Type: application/json
 
 {
     "email": "ivanovivanshopmanager@mail.ru",
-    "password": "1234fwef123r1f1234_2"
+    "password": "1234fwef123r1f1234"
 }
 
 ###
@@ -63,7 +63,7 @@ Content-Type: application/json
 # Обновляем данные по продуктам.
 POST http://localhost:8000/partner/update
 Content-Type: application/json
-Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 
 {
     "url": "https://raw.githubusercontent.com/netology-code/pd-diplom/master/data/shop1.yaml"
@@ -93,35 +93,13 @@ Content-Type: application/json
 
 # Проверяем свои данные.
 GET http://localhost:8000/user/details
-Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 ###
 
 # Вносим контактные данные.
-POST http://localhost:8000/user/contacts
-Content-Type: application/json
-
-{
-    "city": "Lenino",
-    "street": "Lenina",
-    "house": "5",
-    "structure": "1",
-    "building": "B",
-    "apartment": "5",
-    "phone": "12345",
-    "user": 9
-}
-
-###
-
-# Проверяем внесены ли данные.
-GET http://localhost:8000/user/contact
-Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
-
-###
-
 POST http://localhost:8000/user/contact
 Content-Type: application/json
-Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 
 {
     "city": "SPB",
@@ -135,3 +113,132 @@ Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
 }
 
 ###
+
+# Проверяем внесены ли данные.
+GET http://localhost:8000/user/contact
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+###
+
+# Удаляем контактные данные.
+DELETE http://localhost:8000/user/contact
+Content-Type: application/json
+Authorization: Token ecc21950f440f5de81c8cd0801904dbd1bbe2080
+
+{
+    "items": "4"
+}
+
+###
+
+# Просматриваем магазины.
+GET http://localhost:8000/shops
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+###
+
+# Добавляем новый магазин.
+POST http://localhost:8000/shops
+Content-Type: application/json
+
+{
+    "name": "Shop I",
+    "url": null,
+    "state": true,
+    "user": 1
+}
+
+###
+
+# Смотрим категории
+GET http://localhost:8000/categories
+
+###
+
+# Добавляем категории к магазину.
+POST http://localhost:8000/categories
+Content-Type: application/json
+
+{
+    "name": "Flash-накопители",
+    "shops": [1]
+}
+
+###
+
+# Смотрим СВОИ магазины.
+GET http://localhost:8000/partner/state
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+###
+
+# Прекращаем принимать заказы в СВОЕМ магазине.
+POST http://localhost:8000/partner/state
+Content-Type: application/json
+Authorization: Token e6bafcda5f8088094a88cac4389672f14123b348
+
+{
+    "state": "off"
+}
+
+###
+
+# Проверяем продукты.
+GET http://localhost:8000/products
+
+###
+
+# Заполняем корзину.
+POST http://localhost:8000/cart
+Content-Type: application/json
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+{
+    "items": [ { "product": 1, "quantity": 1 },
+                { "product": 2, "quantity": 1 }]
+}
+
+###
+
+# Проверяем корзину.
+GET http://localhost:8000/cart
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+###
+
+# Обновляем корзину.
+PUT http://localhost:8000/cart
+Content-Type: application/json
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+{
+    "items": [ {"id": 6, "quantity": 2} ]
+}
+### 
+
+# Удаляем содержимое корзины
+DELETE http://localhost:8000/cart
+Content-Type: application/json
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+
+{
+    "items": [4]
+}
+
+###
+
+# Оформляем заказ
+POST http://localhost:8000/order
+Content-Type: application/json
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+{
+    "id": 1,
+    "contact": 1
+}
+###
+
+# Просматриваем оформленные заказы.
+GET http://localhost:8000/order
+Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+

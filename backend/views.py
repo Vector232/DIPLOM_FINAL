@@ -21,7 +21,7 @@ from yaml import load as load_yaml, Loader
 
 from backend.models import User, Contact, Shop, Category, Product, ProductParameter, OrderItem, Order, ConfirmEmailToken, Parameter
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, OrderSerializer
-from backend.serializers import  ProductSerializer, CategorySerializer, OrderItemAddSerializer
+from backend.serializers import  ProductSerializer, CategorySerializer, OrderItemSerializer
 
 class PartnerUpdate(APIView):
     permission_classes = [IsAuthenticated]
@@ -260,25 +260,11 @@ class PartnerState(APIView):
                 return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': False, 'ERROR': 'Не указано поле <Статус>!'}, status=status.HTTP_400_BAD_REQUEST)
 
-class PartnerOrders(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        if request.user.type != 'shop':
-            return Response({'status': False, 'ERROR': 'Только для магазинов!'}, status=status.HTTP_403_FORBIDDEN)
-        prefetch = Prefetch('ordered_items', queryset=OrderItem.objects.filter(
-            shop__user_id=request.user.id))
-        order = Order.objects.filter(
-            ordered_items__shop__user_id=request.user.id).exclude(status='cart')\
-            .prefetch_related(prefetch).select_related('contact').annotate(
-                    total_sum=Sum('ordered_items__total_amount'),
-                    total_quantity=Sum('ordered_items__quantity'))
-        serializer = OrderSerializer(order, many=True)
-        return Response(serializer.data)
-
-class ShopView(generics.ListAPIView):
+class ShopView(generics.ListCreateAPIView):
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
+        
 
 class CategoryView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -315,7 +301,7 @@ class CartView(APIView):
 
     def get(self, request, *args, **kwargs):
         cart = Order.objects.filter(
-            user_id=request.user.id, status='cart'
+            user=request.user.id, status='cart'
         ).prefetch_related('ordered_items').annotate(
             total_sum=Sum('ordered_items__total_amount'),
             total_quantity=Sum('ordered_items__quantity')
@@ -325,60 +311,51 @@ class CartView(APIView):
 
     def post(self, request, *args, **kwargs):
         items = request.data.get('items')
+        print(items)
         if items:
             try:
-                items_dict = load_json(items)
-            except ValueError:
-                Response({'Status': False, 'ERROR': 'Неверный формат запроса!'})
-            else:
                 cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
                 objects_created = 0
-                for order_item in items_dict:
-                    order_item.update({'order': cart.id})
-                    product = Product.objects.filter(external_id=order_item['external_id']).values('category', 'shop', 'name', 'price')
-                    order_item.update({'category': product[0]['category'], 'shop': product[0]['shop'], 'product_name': product[0]['name'], 'price': product[0]['price']})
-                    serializer = OrderItemAddSerializer(data=order_item)
-                    if serializer.is_valid():
-                        try:
-                            serializer.save()
-                        except IntegrityError as error:
-                            return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
-                        else:
-                            objects_created += 1
-                    else:
-                        return Response({'status': False, 'ERROR': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-                return Response({'status': True, 'num_objects': objects_created})
+                for order_item in items:
+                    product = Product.objects.filter(id=order_item['product'])[0]
+                    price = product.price
+                    total_amount = order_item['quantity'] * price
+                    OrderItem(order=cart, 
+                              product=product,
+                              price=price,
+                              quantity=order_item['quantity'], 
+                              total_amount=total_amount).save()
+                    objects_created += 1
+                    return Response({'status': True}, status=status.HTTP_200_OK)
+            except ValueError as error:
+                return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': False, 'ERROR': 'Не все необходимые поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'status': False, 'ERROR': 'Не все необходимые поля указаны!'},
-                        status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, *args, **kwargs):
         items = request.data.get('items')
         if items:
             try:
-                items_dictionary = load_json(items)
-            except ValueError:
-                Response({'Status': False, 'ERROR': 'Неверный формат запроса!'})
-            else:
                 cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
                 objects_updated = 0
-                for item in items_dictionary:
+                for item in items:
                     if isinstance(item['id'], int) and isinstance(item['quantity'], int):
                         objects_updated += OrderItem.objects.filter(order_id=cart.id, id=item['id']).update(quantity=item['quantity'])
                 return Response({'status': True, 'edit_objects': objects_updated})
+            except ValueError as error:
+                return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
+            
         return Response({'status': False, 'ERROR': 'Не все поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         items = request.data.get('items')
         if items:
-            items_list = items.split(',')
             cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
             query = Q()
             objects_deleted = False
-            for item_id in items_list:
-                if item_id.isdigit():
-                    query = query | Q(order_id=cart.id, id=item_id)
-                    objects_deleted = True
+            for item_id in items:
+                query = query | Q(order_id=cart.id, id=item_id)
+                objects_deleted = True
             if objects_deleted:
                 count = OrderItem.objects.filter(query).delete()[0]
                 return Response({'status': True, 'del_objects': count}, status=status.HTTP_204_NO_CONTENT)
@@ -398,19 +375,17 @@ class OrderView(APIView):
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response({'Status': False, 'ERROR': 'Authorization required!'}, status=403)
+        
         if {'id', 'contact'}.issubset(request.data):
-            if request.data['id'].isdigit():
-                try:
-                    is_updated = Order.objects.filter(
-                        user_id=request.user.id, id=request.data['id']).update(
-                            contact_id=request.data['contact'], status='new')
-                except IntegrityError as error:
-                    print(error)
-                    return Response({'Status': False, 'ERROR': 'Аргументы указаны неправильно!'})
-                else:
-                    if is_updated:
-                        on_change_order_status(request.user.id, request.data['id'])
-                        return Response({'Status': True})
-                    else:
-                        error_message = 'ERROR'         
+            try:
+                is_updated = Order.objects.filter(
+                    user_id=request.user.id, id=request.data['id']).update(
+                        contact_id=request.data['contact'], status='new')
+            except IntegrityError as error:
+                print(error)
+                return Response({'Status': False, 'ERROR': 'Аргументы указаны неправильно!'})
+            else:
+                if is_updated:
+                    #on_change_order_status(request.user.id, request.data['id']) # долго!
+                    return Response({'Status': True})         
         return Response({'Status': False, 'ERROR': 'Не все необходимые аргументы указаны!'})

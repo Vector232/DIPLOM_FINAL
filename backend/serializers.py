@@ -54,8 +54,8 @@ class OrderItemAddSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    shop = serializers.StringRelatedField()
-    category = serializers.StringRelatedField()
+    order = serializers.StringRelatedField()
+    product = serializers.StringRelatedField()
 
     class Meta:
         model = OrderItem

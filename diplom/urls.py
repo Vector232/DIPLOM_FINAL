@@ -29,9 +29,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/v1/', include(router.urls)),
 
-    path('partner/update', PartnerUpdate.as_view()),
-    path('partner/state', PartnerState.as_view()),
-    path('partner/orders', PartnerOrders.as_view()),
+    path('partner/update', PartnerUpdate.as_view()), # обновление 
+    path('partner/state', PartnerState.as_view()), # статус магазина
     
     path('shops', ShopView.as_view()),
     path('categories', CategoryView.as_view()),
