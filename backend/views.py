@@ -82,7 +82,7 @@ class RegisterUser(APIView):
     """Регистрация покупателя"""
     throttle_scope = 'register'
     def post(self, request, *args, **kwargs):
-        if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
+        if {'first_name', 'last_name', 'email', 'password'}.issubset(request.data):
             try:
                 validate_password(request.data['password'])
             except Exception as error:
@@ -205,9 +205,7 @@ class ContactView(APIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        if {'id'}.issubset(request.data):
-            if request.user.id != request.data['id']:
-                return Response({'status': False, 'ERROR': 'Отказанно в доступе!'}, status=status.HTTP_403_FORBIDDEN)
+        if {'city', 'street', 'house'}.issubset(request.data):
             try:
                 contact = Contact(user=User.objects.get(id=request.user.id),
                                   city=request.data['city'],
@@ -406,6 +404,6 @@ class OrderView(APIView):
                 return Response({'Status': False, 'ERROR': 'Аргументы указаны неправильно!'})
             else:
                 if is_updated:
-                    #on_change_order_status(request.user.id, request.data['id']) # долго!
+                    # on_change_order_status(request.user.id, request.data['id']) # долго!
                     return Response({'Status': True})         
         return Response({'Status': False, 'ERROR': 'Не все необходимые аргументы указаны!'})

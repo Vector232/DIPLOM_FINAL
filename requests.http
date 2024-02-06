@@ -32,8 +32,8 @@ Content-Type: application/json
 {
     "first_name": "Nikolai",
     "last_name": "Nikolaev",
-    "email": "nikolaiNikolaev@mail.ru",
-    "password": "qweriupo231e",
+    "email": "030705vt@mail.ru",
+    "password": "qweriupo231e"
 }
 
 ###
@@ -43,13 +43,24 @@ POST http://localhost:8000/user/register/confirm
 Content-Type: application/json
 
 {
-    "email": "nikolaiNikolaev@mail.ru",
-    "token": ""
+    "email": "030705vt@mail.ru",
+    "token": "ffb4f2c4cca74bcc9756d3"
 }
 
 ###
 
-# Входим в аккаунт.
+# Входим в аккаунт покупателя.
+POST http://localhost:8000/user/login
+Content-Type: application/json
+
+{
+    "email": "030705vt@mail.ru",
+    "password": "qweriupo231e"
+}
+
+###
+
+# Входим в аккаунт менеджера.
 POST http://localhost:8000/user/login
 Content-Type: application/json
 
@@ -63,7 +74,7 @@ Content-Type: application/json
 # Обновляем данные по продуктам.
 POST http://localhost:8000/partner/update
 Content-Type: application/json
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 {
     "url": "https://raw.githubusercontent.com/netology-code/pd-diplom/master/data/shop1.yaml"
@@ -93,13 +104,13 @@ Content-Type: application/json
 
 # Проверяем свои данные.
 GET http://localhost:8000/user/details
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 ###
 
 # Вносим контактные данные.
 POST http://localhost:8000/user/contact
 Content-Type: application/json
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 {
     "city": "SPB",
@@ -108,15 +119,14 @@ Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
     "structure": "1",
     "building": "B",
     "apartment": "5",
-    "phone": "12345",
-    "id": 1
+    "phone": "12345"
 }
 
 ###
 
 # Проверяем внесены ли данные.
 GET http://localhost:8000/user/contact
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 ###
 
@@ -133,7 +143,7 @@ Authorization: Token ecc21950f440f5de81c8cd0801904dbd1bbe2080
 
 # Просматриваем магазины.
 GET http://localhost:8000/shops
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 ###
 
 # Добавляем новый магазин.
@@ -167,7 +177,7 @@ Content-Type: application/json
 
 # Смотрим СВОИ магазины.
 GET http://localhost:8000/partner/state
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 ###
 
@@ -190,7 +200,7 @@ GET http://localhost:8000/products
 # Заполняем корзину.
 POST http://localhost:8000/cart
 Content-Type: application/json
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 {
     "items": [ { "product": 1, "quantity": 1 },
@@ -201,17 +211,17 @@ Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 
 # Проверяем корзину.
 GET http://localhost:8000/cart
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 ###
 
 # Обновляем корзину.
 PUT http://localhost:8000/cart
 Content-Type: application/json
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 {
-    "items": [ {"id": 7, "quantity": 3} ]
+    "items": [ {"id": 9, "quantity": 3} ]
 }
 ### 
 
@@ -227,20 +237,20 @@ Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 
 ###
 
-# Оформляем заказ
+# Оформляем/подтверждаем заказ
 POST http://localhost:8000/order
 Content-Type: application/json
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 {
-    "id": 1,
-    "contact": 1
+    "id": 3,
+    "contact": 2
 }
 ###
 
 # Просматриваем оформленные заказы покупателя.
 GET http://localhost:8000/order
-Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 
 ###
 
