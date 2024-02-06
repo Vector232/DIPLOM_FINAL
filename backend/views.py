@@ -260,6 +260,24 @@ class PartnerState(APIView):
                 return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': False, 'ERROR': 'Не указано поле <Статус>!'}, status=status.HTTP_400_BAD_REQUEST)
 
+class PartnerOrders(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Функция для получения заказов поставщиками"""
+        if request.user.type != 'shop':
+            return Response({'status': False, 'ERROR': 'Только для магазинов!'}, status=status.HTTP_403_FORBIDDEN)
+        
+        prefetch = Prefetch('ordered_items', queryset=OrderItem.objects.filter(
+            product__shop__user_id=request.user.id))
+        
+        order = Order.objects.filter(
+            ordered_items__product__shop__user_id=request.user.id).exclude(status='cart')\
+            .prefetch_related(prefetch).select_related('contact').annotate(
+                    total_sum=Sum('ordered_items__total_amount'),
+                    total_quantity=Sum('ordered_items__quantity'))
+        serializer = OrderSerializer(order, many=True)
+        return Response(serializer.data)
 
 class ShopView(generics.ListCreateAPIView):
     queryset = Shop.objects.filter(state=True)

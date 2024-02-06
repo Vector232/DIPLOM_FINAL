@@ -31,6 +31,7 @@ urlpatterns = [
 
     path('partner/update', PartnerUpdate.as_view()), # обновление 
     path('partner/state', PartnerState.as_view()), # статус магазина
+    path('partner/orders', PartnerOrders.as_view()),
     
     path('shops', ShopView.as_view()),
     path('categories', CategoryView.as_view()),
