@@ -211,7 +211,7 @@ Content-Type: application/json
 Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 
 {
-    "items": [ {"id": 6, "quantity": 2} ]
+    "items": [ {"id": 7, "quantity": 3} ]
 }
 ### 
 
@@ -238,10 +238,12 @@ Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 }
 ###
 
-# Просматриваем оформленные заказы.
+# Просматриваем оформленные заказы покупателя.
 GET http://localhost:8000/order
 Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
 
 ###
+
+# Просматриваем оформленные заказы поставщика.
 GET http://localhost:8000/partner/orders
 Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd

@@ -358,7 +358,9 @@ class CartView(APIView):
                 objects_updated = 0
                 for item in items:
                     if isinstance(item['id'], int) and isinstance(item['quantity'], int):
-                        objects_updated += OrderItem.objects.filter(order_id=cart.id, id=item['id']).update(quantity=item['quantity'])
+                        order_item = OrderItem.objects.filter(order_id=cart.id, id=item['id'])[0]
+                        total_amount = order_item.product.price * item['quantity']
+                        objects_updated += OrderItem.objects.filter(order_id=cart.id, id=item['id']).update(quantity=item['quantity'], total_amount=total_amount)
                 return Response({'status': True, 'edit_objects': objects_updated})
             except ValueError as error:
                 return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
