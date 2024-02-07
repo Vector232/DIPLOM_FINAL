@@ -1,5 +1,4 @@
 from django.db import IntegrityError
-from django.shortcuts import render
 from django.db.models import Sum, Q, Prefetch
 from django.core.mail import EmailMessage
 from django.contrib.auth import authenticate
@@ -16,8 +15,8 @@ from rest_framework.authtoken.models import Token
 
 from distutils.util import strtobool
 from requests import get
-from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
+
 
 from backend.models import User, Contact, Shop, Category, Product, ProductParameter, OrderItem, Order, ConfirmEmailToken, Parameter
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, OrderSerializer
@@ -77,6 +76,7 @@ def on_change_order_status(user_id, order_id):
     mail_subject = 'Статус изменен!'
     email = EmailMessage(mail_subject, message, to=[to_email])
     email.send()
+     
 
 class RegisterUser(APIView):
     """Регистрация покупателя"""
@@ -352,7 +352,7 @@ class CartView(APIView):
         items = request.data.get('items')
         if items:
             try:
-                cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
+                cart, _ = Order.objects.get_or_create(user_id=request.user.id, status=request.data.get('items'))
                 objects_updated = 0
                 for item in items:
                     if isinstance(item['id'], int) and isinstance(item['quantity'], int):
@@ -404,6 +404,6 @@ class OrderView(APIView):
                 return Response({'Status': False, 'ERROR': 'Аргументы указаны неправильно!'})
             else:
                 if is_updated:
-                    # on_change_order_status(request.user.id, request.data['id']) # долго!
+                    on_change_order_status(request.user.id, request.data['id']) # долго!
                     return Response({'Status': True})         
         return Response({'Status': False, 'ERROR': 'Не все необходимые аргументы указаны!'})

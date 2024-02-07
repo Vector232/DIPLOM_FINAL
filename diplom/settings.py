@@ -113,9 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.mail.ru'
-EMAIL_PORT = '465'
-EMAIL_HOST_USER = 'netology.diplom@mail.ru'
-EMAIL_HOST_PASSWORD = 'RANGVKPEZ61jsCgTbsbG'
+EMAIL_PORT = '25'
+EMAIL_HOST_USER = '030705vt@mail.ru'
+EMAIL_HOST_PASSWORD = '---'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LANGUAGE_CODE = 'ru'
