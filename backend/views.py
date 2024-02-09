@@ -13,6 +13,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 
+from drf_spectacular.utils import extend_schema
 from distutils.util import strtobool
 from requests import get
 from yaml import load as load_yaml, Loader
@@ -24,7 +25,8 @@ from backend.serializers import  ProductSerializer, CategorySerializer, OrderIte
 
 class PartnerUpdate(APIView):
     permission_classes = [IsAuthenticated]
-    
+
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         
         if request.user.type != 'shop':
@@ -81,6 +83,8 @@ def on_change_order_status(user_id, order_id):
 class RegisterUser(APIView):
     """Регистрация покупателя"""
     throttle_scope = 'register'
+
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'first_name', 'last_name', 'email', 'password'}.issubset(request.data):
             try:
@@ -102,7 +106,9 @@ class RegisterUser(APIView):
         return Response({'status': False, 'ERROR': 'Не все поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
 class Сonfirmation(APIView):
-    """Подтверждение регистрации""" 
+    """Подтверждение регистрации"""
+
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'email', 'token'}.issubset(request.data):
             token = ConfirmEmailToken.objects.filter(user__email=request.data['email'],
@@ -120,6 +126,8 @@ class Сonfirmation(APIView):
 
 class LoginUser(APIView):
     """Авторизация"""
+
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'email', 'password'}.issubset(request.data):
             user = authenticate(request, username=request.data['email'], password=request.data['password'])
@@ -134,10 +142,12 @@ class UserInfo(APIView):
     """Просмотр и изменение данных пользователя"""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'password'}.issubset(request.data):
             if 'password' in request.data:
@@ -161,6 +171,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class LoginUser(APIView):
     """Авторизация"""
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'email', 'password'}.issubset(request.data):
             user = authenticate(request, username=request.data['email'], password=request.data['password'])
@@ -175,10 +186,12 @@ class DetailUser(APIView):
     """Просмотр и изменение данных пользователя"""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'password'}.issubset(request.data):
             if 'password' in request.data:
@@ -198,12 +211,13 @@ class DetailUser(APIView):
 
 class ContactView(APIView):
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         contact = Contact.objects.filter(user_id=request.user.id)
         serializer = ContactSerializer(contact, many=True)
         return Response(serializer.data)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if {'city', 'street', 'house'}.issubset(request.data):
             try:
@@ -225,6 +239,7 @@ class ContactView(APIView):
             return Response({'status': False, 'ERROR': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': False, 'ERROR': 'Не все необходимые поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def delete(self, request, *args, **kwargs):
         if {'items'}.issubset(request.data):
             for item in request.data["items"].split(','):
@@ -239,6 +254,7 @@ class ContactView(APIView):
 class PartnerState(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         if request.user.type != 'shop':
             return Response({'status': False, 'ERROR': 'Только для магазинов!'}, status=status.HTTP_403_FORBIDDEN)
@@ -246,6 +262,7 @@ class PartnerState(APIView):
         serializer = ShopSerializer(shop)
         return Response(serializer.data)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if request.user.type != 'shop':
             return Response({'status': False, 'ERROR': 'Только для магазинов!'}, status=status.HTTP_403_FORBIDDEN)
@@ -261,6 +278,7 @@ class PartnerState(APIView):
 class PartnerOrders(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         """Функция для получения заказов поставщиками"""
         if request.user.type != 'shop':
@@ -294,6 +312,7 @@ class ApiListPagination(PageNumberPagination):
 class ProductView(APIView):
     pagination_class = ApiListPagination
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         query = Q(shop__state=True)
         shop_id = request.query_params.get('shop_id')
@@ -315,6 +334,7 @@ class CartView(APIView):
     """Корзина покупателя"""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         cart = Order.objects.filter(
             user=request.user.id, status='cart'
@@ -325,6 +345,7 @@ class CartView(APIView):
         serializer = OrderSerializer(cart, many=True)
         return Response(serializer.data)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         items = request.data.get('items')
         print(items)
@@ -347,7 +368,7 @@ class CartView(APIView):
                 return Response({'status': False, 'ERROR': str(error)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': False, 'ERROR': 'Не все необходимые поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
-
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def put(self, request, *args, **kwargs):
         items = request.data.get('items')
         if items:
@@ -365,6 +386,7 @@ class CartView(APIView):
             
         return Response({'status': False, 'ERROR': 'Не все поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def delete(self, request, *args, **kwargs):
         items = request.data.get('items')
         if items:
@@ -383,13 +405,15 @@ class OrderView(APIView):
     """Заказы"""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def get(self, request, *args, **kwargs):
         order = Order.objects.filter(
             user_id=request.user.id).annotate(total_quantity=Sum('ordered_items__quantity'), total_sum=Sum(
                 'ordered_items__total_amount')).distinct()
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data)
-
+    
+    @extend_schema(request=None, responses={200: {"type": "string"}})
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response({'Status': False, 'ERROR': 'Authorization required!'}, status=403)
