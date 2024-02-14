@@ -38,12 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'backend',
+    'django_dramatiq',
 
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
     'drf_spectacular',
+    'social_django',
+
+    'backend',
+
 ]
 
 
@@ -70,13 +74,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'diplom.wsgi.application'
-
+ASGI_APPLICATION = 'myproject.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -116,7 +121,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = '25'
 EMAIL_HOST_USER = '030705vt@mail.ru'
-EMAIL_HOST_PASSWORD = '---'
+EMAIL_HOST_PASSWORD = 'zEujCD2jmgai67yNfTKy'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 LANGUAGE_CODE = 'ru'
@@ -167,4 +172,46 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
+}
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.vk.VKOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = '51723957'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = 'OrClL2nDbU4u8o0KEwoI'
+
+LOGIN_REDIRECT_URL = '/'
+
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.rabbitmq.RabbitmqBroker",
+    "OPTIONS": {
+        "url": "amqp://localhost:5672",
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.Prometheus",
+        "dramatiq.middleware.AgeLimit",
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Callbacks",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+    ]
+}
+
+# Defines which database should be used to persist Task objects when the
+# AdminMiddleware is enabled.  The default value is "default".
+DRAMATIQ_TASKS_DATABASE = "default"
+
+DRAMATIQ_RESULT_BACKEND = {
+    "BACKEND": "dramatiq.results.backends.redis.RedisBackend",
+    "BACKEND_OPTIONS": {
+        "url": "redis://localhost:6379",
+    },
+    "MIDDLEWARE_OPTIONS": {
+        "result_ttl": 1000 * 60 * 10
+    }
 }

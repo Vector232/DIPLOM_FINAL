@@ -257,3 +257,8 @@ Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
 # Просматриваем оформленные заказы поставщика.
 GET http://localhost:8000/partner/orders
 Authorization: Token 3e75128746b3884338dfce1a7c4c35b8d7d89ebd
+
+###
+
+# Регистрация через ВК. Привязана не к ВЕБ-приложению, поэтому проблема с перенаправлением.
+GET http://localhost:8000/login/vk-oauth2

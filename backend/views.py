@@ -18,10 +18,12 @@ from distutils.util import strtobool
 from requests import get
 from yaml import load as load_yaml, Loader
 
-
 from backend.models import User, Contact, Shop, Category, Product, ProductParameter, OrderItem, Order, ConfirmEmailToken, Parameter
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, OrderSerializer
-from backend.serializers import  ProductSerializer, CategorySerializer, OrderItemSerializer
+from backend.serializers import  ProductSerializer, CategorySerializer
+
+from dramatiq.brokers.redis import RedisBroker 
+import dramatiq
 
 class PartnerUpdate(APIView):
     permission_classes = [IsAuthenticated]
@@ -68,7 +70,8 @@ class PartnerUpdate(APIView):
                 return Response({'status': True})
             
         return Response({'status': False, 'ERROR': 'Не все необходимые поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+@dramatiq.actor
 def on_change_order_status(user_id, order_id):
     """Письмо о статусе заказа"""
     user = User.objects.get(id=user_id)
@@ -428,6 +431,6 @@ class OrderView(APIView):
                 return Response({'Status': False, 'ERROR': 'Аргументы указаны неправильно!'})
             else:
                 if is_updated:
-                    on_change_order_status(request.user.id, request.data['id']) # долго!
+                    on_change_order_status(request.user.id, request.data['id'])
                     return Response({'Status': True})         
         return Response({'Status': False, 'ERROR': 'Не все необходимые аргументы указаны!'})
