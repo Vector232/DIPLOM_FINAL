@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django_rest_passwordreset.views import reset_password_confirm, reset_password_request_token
 
+from baton.autodiscover import admin
 from rest_framework import routers
 
 from backend.views import *
@@ -28,6 +29,7 @@ router.register(r'user', UserViewSet)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/v1/', include(router.urls)),
+    path('baton/', include('baton.urls')),
     path('', include('social_django.urls')),
     
     path('partner/update', PartnerUpdate.as_view()), # обновление 
