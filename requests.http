@@ -9,7 +9,8 @@ Content-Type: application/json
     "password": "1234fwef123r1f1234",
     "company": "Company I",
     "position": "manager",
-    "type": "shop"
+    "type": "shop",
+
 }
 
 ###
@@ -119,7 +120,8 @@ Authorization: Token c2a726c23f8d6a33811833ec2318d37a00ff572e
     "structure": "1",
     "building": "B",
     "apartment": "5",
-    "phone": "12345"
+    "phone": "12345",
+    "photo": "https://i.ytimg.com/vi/RrhM4J5ezmc/maxresdefault.jpg?9289889566"
 }
 
 ###

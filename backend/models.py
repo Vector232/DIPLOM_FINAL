@@ -5,6 +5,13 @@ from django.contrib.auth.models import AbstractUser
 
 from django_rest_passwordreset.tokens import get_token_generator
 
+from PIL import Image
+from imagekit.models.fields import ImageSpecField
+from imagekit.processors import ResizeToFit, Adjust,ResizeToFill
+
+import os
+import uuid
+
 STATUS_CHOICES = (
     ('cart', 'Корзина'),
     ('new', 'Новый'),
@@ -61,7 +68,7 @@ class User(AbstractUser):
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE, max_length=5, default='buyer')
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name} {self.photo}'
 
 class Contact(models.Model):
     user = models.ForeignKey(User, verbose_name='Пользователь', related_name='contacts', blank=True, on_delete=models.CASCADE)
@@ -72,6 +79,7 @@ class Contact(models.Model):
     building = models.CharField(max_length=50, verbose_name='Строение', blank=True)
     apartment = models.CharField(max_length=50, verbose_name='Квартира', blank=True)
     phone = models.CharField(max_length=50, verbose_name='Телефон')
+    photo = models.ImageField(verbose_name='Фото',blank=True, null=True)
 
     def __str__(self):
         return f'{self.city}, ул.{self.street}, дом {self.house} ({self.phone})'	
@@ -111,17 +119,24 @@ class Category(models.Model):
 		return self.name
 
 class Product(models.Model):
-	name = models.CharField(max_length=50, verbose_name='Название')
-	category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True, on_delete=models.CASCADE)
-	model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
-	external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
-	shop = models.ForeignKey(Shop, verbose_name='Магазин', related_name='products_info', blank=True, on_delete=models.CASCADE)
-	quantity = models.PositiveIntegerField(verbose_name='Количество')
-	price = models.PositiveIntegerField(verbose_name='Цена')
-	price_rrc = models.PositiveIntegerField(verbose_name='Рекомендуемая розничная цена')
-
-	def __str__(self):
-		return self.name
+    def get_file_path(self, filename):
+        extension = filename.split('.')[-1]
+        filename = "%s.%s" % (uuid.uuid4(), extension)
+        return os.path.join("images", filename)
+    
+    name = models.CharField(max_length=50, verbose_name='Название')
+    category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True, on_delete=models.CASCADE)
+    model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
+    external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
+    shop = models.ForeignKey(Shop, verbose_name='Магазин', related_name='products_info', blank=True, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(verbose_name='Количество')
+    price = models.PositiveIntegerField(verbose_name='Цена')
+    price_rrc = models.PositiveIntegerField(verbose_name='Рекомендуемая розничная цена')
+    
+    photo = models.ImageField(verbose_name=u'Постер',upload_to=get_file_path,max_length=256, blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.name} {self.photo}"
 
 class Parameter(models.Model):
 	name = models.CharField(max_length=50, verbose_name='Название')

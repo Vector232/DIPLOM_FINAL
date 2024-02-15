@@ -25,13 +25,12 @@ from backend.views import *
 router = routers.SimpleRouter()
 router.register(r'user', UserViewSet)
 
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/v1/', include(router.urls)),
     path('baton/', include('baton.urls')),
     path('', include('social_django.urls')),
-    
+
     path('partner/update', PartnerUpdate.as_view()), # обновление 
     path('partner/state', PartnerState.as_view()), # статус магазина
     path('partner/orders', PartnerOrders.as_view()),

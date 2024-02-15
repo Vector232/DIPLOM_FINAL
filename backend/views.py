@@ -25,6 +25,8 @@ from backend.serializers import  ProductSerializer, CategorySerializer
 from dramatiq.brokers.redis import RedisBroker 
 import dramatiq
 
+dramatiq.set_broker(RedisBroker())
+
 class PartnerUpdate(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -71,7 +73,6 @@ class PartnerUpdate(APIView):
             
         return Response({'status': False, 'ERROR': 'Не все необходимые поля указаны!'}, status=status.HTTP_400_BAD_REQUEST)
 
-@dramatiq.actor
 def on_change_order_status(user_id, order_id):
     """Письмо о статусе заказа"""
     user = User.objects.get(id=user_id)
